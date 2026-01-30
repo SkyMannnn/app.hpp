@@ -3,67 +3,63 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>pure.freshjuice - Stable Edition</title>
+    <title>pure.freshjuice - Stable POS</title>
     <style>
         :root { --primary: #3498db; --secondary: #2ecc71; --danger: #e74c3c; --dark: #2c3e50; --light: #f4f7f6; }
         body { font-family: 'Segoe UI', sans-serif; background: var(--light); margin: 0; padding-bottom: 100px; }
         
-        .app-header { background: white; padding: 15px; text-align: center; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
-        .app-brand { font-weight: 800; font-size: 20px; color: var(--dark); letter-spacing: -0.5px; }
-        .app-brand span { color: var(--secondary); }
-
         .bottom-nav { position: fixed; bottom: 0; width: 100%; background: white; display: flex; box-shadow: 0 -2px 15px rgba(0,0,0,0.1); z-index: 1000; }
-        .nav-item { flex: 1; padding: 12px; text-align: center; cursor: pointer; font-weight: bold; color: #888; font-size: 11px; }
+        .nav-item { flex: 1; padding: 15px; text-align: center; cursor: pointer; font-weight: bold; color: #888; font-size: 12px; }
         .nav-item.active { color: var(--primary); border-top: 4px solid var(--primary); background: #f9f9f9; }
 
         .container { padding: 20px; max-width: 800px; margin: auto; }
         .page { display: none; }
         .page.active { display: block; }
 
-        .pos-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
-        .product-btn { background: white; padding: 15px; border-radius: 15px; text-align: center; border: 2px solid #f0f0f0; cursor: pointer; transition: 0.2s; box-shadow: 0 4px 6px rgba(0,0,0,0.02); }
-        .product-btn.out { opacity: 0.4; filter: grayscale(1); pointer-events: none; }
-        
-        .cart-section { background: white; border-radius: 15px; padding: 15px; box-shadow: 0 -5px 20px rgba(0,0,0,0.1); margin-top: 20px; border-top: 4px solid var(--secondary); }
-        .cart-item { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid #eee; }
-        .btn-qty { background: #eee; border: none; width: 25px; height: 25px; border-radius: 5px; cursor: pointer; }
-
         .card { background: white; padding: 20px; border-radius: 15px; box-shadow: 0 4px 12px rgba(0,0,0,0.08); margin-bottom: 20px; }
         label { display: block; font-size: 11px; font-weight: bold; margin-bottom: 5px; color: #666; text-transform: uppercase; }
         input { width: 100%; padding: 12px; margin-bottom: 12px; border: 1.5px solid #eee; border-radius: 10px; box-sizing: border-box; }
-        .btn-main { width: 100%; padding: 15px; background: var(--secondary); color: white; border: none; border-radius: 10px; font-size: 16px; font-weight: bold; cursor: pointer; }
-        .btn-del { background: var(--danger); color: white; border: none; padding: 6px 10px; border-radius: 5px; cursor: pointer; font-size: 11px; }
         
+        .pos-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+        .product-btn { background: white; padding: 15px; border-radius: 15px; text-align: center; border: 2px solid #f0f0f0; cursor: pointer; }
+        .product-btn.out { opacity: 0.4; filter: grayscale(1); pointer-events: none; }
+
+        .cart-section { background: white; border-radius: 15px; padding: 20px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); margin-top: 20px; border-top: 5px solid var(--secondary); }
+        .cart-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
+        .cart-item { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid #f9f9f9; }
+        .qty-controls { display: flex; align-items: center; gap: 5px; }
+        .btn-qty { width: 32px; height: 32px; border-radius: 8px; border: 1px solid #ddd; background: #f8f8f8; cursor: pointer; font-weight: bold; font-size: 16px; }
+        
+        .total-row { display: flex; justify-content: space-between; align-items: center; margin: 20px 0; font-size: 18px; font-weight: 800; }
+        .btn-checkout { width: 100%; padding: 16px; background: var(--secondary); color: white; border: none; border-radius: 12px; font-size: 18px; font-weight: bold; cursor: pointer; }
+
         .table-card { background: white; border-radius: 15px; overflow-x: auto; box-shadow: 0 4px 12px rgba(0,0,0,0.08); }
         table { width: 100%; border-collapse: collapse; min-width: 500px; }
-        th { background: var(--primary); color: white; padding: 12px; text-align: left; font-size: 13px; }
-        td { padding: 12px; border-bottom: 1px solid #eee; font-size: 13px; }
+        th { background: var(--primary); color: white; padding: 12px; text-align: left; font-size: 12px; }
+        td { padding: 12px; border-bottom: 1px solid #eee; font-size: 12px; }
+        .btn-del { background: var(--danger); color: white; border: none; padding: 6px 10px; border-radius: 5px; cursor: pointer; font-size: 10px; }
 
         @media (max-width: 600px) { .pos-grid { grid-template-columns: 1fr; } }
     </style>
 </head>
 <body>
 
-<div class="app-header">
-    <div class="app-brand">pure.<span>freshjuice</span></div>
-</div>
-
 <div class="container">
     <div id="page-pos" class="page active">
-        <h3 style="text-align:center">🛒 Menu Jualan</h3>
+        <h3 style="text-align:center">🛒 Menu pure.freshjuice</h3>
         <div id="pos-items" class="pos-grid"></div>
         
         <div id="cart-ui" class="cart-section" style="display:none;">
-            <div style="display:flex; justify-content:space-between; align-items:center;">
-                <h4 style="margin:0">🛍️ Keranjang</h4>
-                <button onclick="cart=[]; renderCart();" style="border:none; background:none; color:red; cursor:pointer; font-size:12px;">Batal Semua</button>
+            <div class="cart-header">
+                <span style="font-weight:bold; font-size:16px;">🛍️ Keranjang</span>
+                <span onclick="cart=[]; renderCart();" style="color:var(--danger); cursor:pointer; font-size:13px;">Batal Semua</span>
             </div>
             <div id="cart-items"></div>
-            <div style="margin-top:15px; display:flex; justify-content:space-between; font-weight:bold;">
+            <div class="total-row">
                 <span>Total Bayar:</span>
                 <span id="cart-total">Rp 0</span>
             </div>
-            <button class="btn-main" style="margin-top:15px;" onclick="checkout()">Konfirmasi Jual</button>
+            <button class="btn-checkout" onclick="checkout()">Konfirmasi Jual</button>
         </div>
     </div>
 
@@ -71,18 +67,18 @@
         <h3 style="text-align:center">📦 Manajemen Stok</h3>
         <div class="card">
             <label>Nama Produk</label>
-            <input type="text" id="p-name" placeholder="---masukan---">
+            <input type="text" id="p-name" placeholder="masukan nama">
             <label>Modal HPP (Rp)</label>
             <input type="text" id="p-hpp" class="money" placeholder="0">
             <label>Margin Laba (%)</label>
             <input type="number" id="p-margin" value="20">
             <label>Tambah Stok</label>
             <input type="number" id="p-qty" placeholder="0">
-            <button class="btn-main" onclick="saveData()">Update / Simpan Produk</button>
+            <button class="btn-checkout" onclick="saveData()">Update / Simpan Produk</button>
         </div>
         <div class="table-card">
             <table>
-                <thead><tr><th>Produk</th><th>HPP</th><th>Harga</th><th>Stok</th><th>Aksi</th></tr></thead>
+                <thead><tr><th>Update</th><th>Produk</th><th>Harga</th><th>Stok</th><th>Aksi</th></tr></thead>
                 <tbody id="table-body"></tbody>
             </table>
         </div>
@@ -109,10 +105,15 @@
 </div>
 
 <script>
-    const ADMIN_PASS = "041116"; 
+    const ADMIN_PASS = "1234"; 
     let db = JSON.parse(localStorage.getItem('juiceInventory')) || [];
     let history = JSON.parse(localStorage.getItem('juiceHistory')) || [];
     let cart = [];
+
+    function getNow() {
+        const d = new Date();
+        return d.toLocaleDateString('id-ID') + " " + d.toLocaleTimeString('id-ID', { hour12: false });
+    }
 
     function switchTab(id, el) {
         document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
@@ -122,34 +123,25 @@
         renderPOS(); renderTable(); renderHistory();
     }
 
-    function verifyAdmin() {
-        const pass = prompt("Masukkan Sandi Keamanan:");
-        return pass === ADMIN_PASS;
-    }
-
     function saveData() {
-        const name = document.getElementById('p-name').value.trim();
+        const name = document.getElementById('p-name').value.trim() || "Produk";
         const hpp = parseInt(document.getElementById('p-hpp').value.replace(/\./g, '')) || 0;
         const margin = parseFloat(document.getElementById('p-margin').value) || 0;
         const qty = parseInt(document.getElementById('p-qty').value) || 0;
+        if(hpp === 0) return alert("HPP wajib!");
 
-        if(!name || hpp === 0) return alert("Nama dan HPP wajib diisi!");
-
-        const price = hpp + (hpp * margin / 100);
+        const price = Math.round(hpp + (hpp * margin / 100));
+        let idx = db.findIndex(d => d.name.toLowerCase() === name.toLowerCase());
         
-        // Cek jika produk sudah ada (Update Stok)
-        let existingIndex = db.findIndex(d => d.name.toLowerCase() === name.toLowerCase());
-        
-        if(existingIndex !== -1) {
-            db[existingIndex].stock += qty;
-            db[existingIndex].hpp = hpp;
-            db[existingIndex].price = price;
+        if(idx !== -1) {
+            db[idx].stock += qty;
+            db[idx].price = price;
+            db[idx].time = getNow();
         } else {
-            db.unshift({ id: Date.now(), name, hpp, margin, price, stock: qty });
+            db.unshift({ id: Date.now(), name, price, stock: qty, time: getNow() });
         }
-
         localStorage.setItem('juiceInventory', JSON.stringify(db));
-        alert("Data Berhasil Disimpan!");
+        alert("Data Tersimpan!");
         document.getElementById('p-name').value = '';
         document.getElementById('p-hpp').value = '';
         document.getElementById('p-qty').value = '';
@@ -158,15 +150,12 @@
 
     function renderPOS() {
         const grid = document.getElementById('pos-items');
-        grid.innerHTML = db.map((item, idx) => {
-            const isOut = item.stock <= 0;
-            return `
-                <div class="product-btn ${isOut ? 'out' : ''}" onclick="addToCart(${idx})">
-                    <strong>${item.name}</strong><br>
-                    <span style="color:var(--secondary); font-weight:bold;">Rp ${item.price.toLocaleString('id-ID')}</span><br>
-                    <small>${isOut ? 'HABIS' : 'Stok: ' + item.stock}</small>
-                </div>`;
-        }).join('');
+        grid.innerHTML = db.map((item, idx) => `
+            <div class="product-btn ${item.stock <= 0 ? 'out' : ''}" onclick="addToCart(${idx})">
+                <strong>${item.name}</strong><br>
+                <span style="color:var(--secondary); font-weight:bold;">Rp ${item.price.toLocaleString('id-ID')}</span><br>
+                <small>Sisa: ${item.stock}</small>
+            </div>`).join('');
     }
 
     function addToCart(idx) {
@@ -174,10 +163,20 @@
         const inCart = cart.find(c => c.id === item.id);
         if(inCart) {
             if(inCart.qty < item.stock) inCart.qty++;
-            else alert("Stok tidak mencukupi!");
+            else alert("Stok Habis!");
         } else {
             cart.push({...item, qty: 1});
         }
+        renderCart();
+    }
+
+    function updateQty(id, delta) {
+        const item = cart.find(c => c.id === id);
+        const original = db.find(d => d.id === id);
+        if(!item) return;
+        item.qty += delta;
+        if(item.qty > original.stock) item.qty = original.stock;
+        if(item.qty <= 0) cart = cart.filter(c => c.id !== id);
         renderCart();
     }
 
@@ -186,90 +185,92 @@
         const list = document.getElementById('cart-items');
         if(cart.length === 0) { ui.style.display = 'none'; return; }
         ui.style.display = 'block';
-        
-        let total = 0;
-        list.innerHTML = cart.map((c, idx) => {
-            total += (c.price * c.qty);
-            return `
-                <div class="cart-item">
-                    <span>${c.name} (x${c.qty})</span>
-                    <div class="cart-controls">
-                        <button class="btn-qty" onclick="updateQty(${idx}, -1)">-</button>
-                        <button class="btn-qty" onclick="updateQty(${idx}, 1)">+</button>
-                    </div>
-                </div>`;
-        }).join('');
-        document.getElementById('cart-total').innerText = `Rp ${total.toLocaleString('id-ID')}`;
-    }
 
-    function updateQty(idx, change) {
-        const item = cart[idx];
-        const dbItem = db.find(d => d.id === item.id);
-        item.qty += change;
-        if(item.qty > dbItem.stock) item.qty = dbItem.stock;
-        if(item.qty <= 0) cart.splice(idx, 1);
-        renderCart();
+        let total = 0;
+        list.innerHTML = cart.map(c => {
+            total += (c.price * c.qty);
+            return `<div class="cart-item">
+                <span style="font-weight:500;">${c.name} (x${c.qty})</span>
+                <div class="qty-controls">
+                    <button class="btn-qty" onclick="updateQty(${c.id}, -1)">-</button>
+                    <button class="btn-qty" onclick="updateQty(${c.id}, 1)">+</button>
+                </div>
+            </div>`;
+        }).join('');
+        document.getElementById('cart-total').innerText = `Rp ${Math.round(total).toLocaleString('id-ID')}`;
     }
 
     function checkout() {
-        if(!confirm("Proses Penjualan?")) return;
+        if(cart.length === 0) return;
+        if(!confirm("Konfirmasi Jual & Cetak Struk?")) return;
+
+        let totalGrand = 0;
+        let receiptItems = "";
+
         cart.forEach(c => {
             const target = db.find(d => d.id === c.id);
             if(target) target.stock -= c.qty;
-            history.unshift({
-                time: new Date().toLocaleTimeString('id-ID'),
-                name: c.name,
-                qty: c.qty,
-                total: c.price * c.qty
-            });
+            let sub = Math.round(c.price * c.qty);
+            totalGrand += sub;
+            receiptItems += `
+                <div style="display:flex; justify-content:space-between; margin-bottom:5px;">
+                    <span>${c.name} x${c.qty}</span>
+                    <span>Rp ${sub.toLocaleString()}</span>
+                </div>`;
+            history.unshift({ time: getNow(), name: c.name, qty: c.qty, total: sub });
         });
+
+        // Simpan data
         localStorage.setItem('juiceInventory', JSON.stringify(db));
         localStorage.setItem('juiceHistory', JSON.stringify(history));
+
+        // METODE CETAK BARU (Pop-up Window)
+        const printWindow = window.open('', '', 'width=400,height=600');
+        printWindow.document.write(`
+            <html>
+            <head><title>Struk Belanja</title></head>
+            <body style="font-family:monospace; padding:20px; width:300px;">
+                <div style="text-align:center;">
+                    <h2 style="margin:0;">pure.freshjuice</h2>
+                    <p style="font-size:12px;">${getNow()}</p>
+                    <hr style="border:none; border-top:1px dashed #000;">
+                </div>
+                ${receiptItems}
+                <hr style="border:none; border-top:1px dashed #000;">
+                <div style="display:flex; justify-content:space-between; font-weight:bold;">
+                    <span>TOTAL</span>
+                    <span>Rp ${totalGrand.toLocaleString()}</span>
+                </div>
+                <p style="text-align:center; margin-top:30px; font-size:12px;">Terima Kasih!</p>
+                <script>
+                    window.onload = function() { window.print(); window.close(); };
+                <\/script>
+            </body>
+            </html>
+        `);
+        printWindow.document.close();
+
+        // Reset keranjang
         cart = []; renderCart(); renderPOS();
-        alert("Berhasil!");
     }
 
     function renderTable() {
-        const tbody = document.getElementById('table-body');
-        tbody.innerHTML = db.map((item, idx) => `
-            <tr>
-                <td><strong>${item.name}</strong></td>
-                <td>Rp ${item.hpp.toLocaleString()}</td>
-                <td>Rp ${item.price.toLocaleString()}</td>
-                <td>${item.stock}</td>
-                <td><button class="btn-del" onclick="if(verifyAdmin()){ db.splice(${idx},1); localStorage.setItem('juiceInventory', JSON.stringify(db)); renderTable(); } else { alert('Sandi Salah'); }">Hapus</button></td>
-            </tr>`).join('');
+        document.getElementById('table-body').innerHTML = db.map((item, idx) => `
+            <tr><td>${item.time || '-'}</td><td><strong>${item.name}</strong></td><td>Rp ${item.price.toLocaleString()}</td><td>${item.stock}</td><td><button class="btn-del" onclick="if(prompt('Sandi:')=='${ADMIN_PASS}'){db.splice(${idx},1);localStorage.setItem('juiceInventory',JSON.stringify(db));renderTable();}">Hapus</button></td></tr>`).join('');
     }
 
     function renderHistory() {
-        const tbody = document.getElementById('history-body');
-        tbody.innerHTML = history.map((h, idx) => `
-            <tr>
-                <td>${h.time}</td>
-                <td>${h.name}</td>
-                <td>${h.qty}</td>
-                <td>Rp ${h.total.toLocaleString()}</td>
-                <td><button class="btn-del" onclick="if(verifyAdmin()){ history.splice(${idx},1); localStorage.setItem('juiceHistory', JSON.stringify(history)); renderHistory(); } else { alert('Sandi Salah'); }">Hapus</button></td>
-            </tr>`).join('');
+        document.getElementById('history-body').innerHTML = history.map((h, idx) => `
+            <tr><td>${h.time}</td><td>${h.name}</td><td>${h.qty}</td><td>Rp ${h.total.toLocaleString()}</td><td><button class="btn-del" onclick="if(prompt('Sandi:')=='${ADMIN_PASS}'){history.splice(${idx},1);localStorage.setItem('juiceHistory',JSON.stringify(history));renderHistory();}">X</button></td></tr>`).join('');
     }
 
-    function clearAllHistory() {
-        if(verifyAdmin()) {
-            if(confirm("Hapus semua riwayat?")) {
-                history = [];
-                localStorage.setItem('juiceHistory', JSON.stringify(history));
-                renderHistory();
-            }
-        } else { alert('Sandi Salah'); }
-    }
-
+    function clearAllHistory() { if(prompt('Sandi:') == ADMIN_PASS) { history = []; localStorage.setItem('juiceHistory', JSON.stringify(history)); renderHistory(); } }
     document.querySelectorAll('.money').forEach(input => {
         input.addEventListener('input', function() {
             let v = this.value.replace(/[^0-9]/g, '');
             if (v) this.value = parseInt(v).toLocaleString('id-ID');
         });
     });
-
     window.onload = () => { renderPOS(); renderTable(); renderHistory(); };
 </script>
 </body>
