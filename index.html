@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kalkulator HPP & Stok</title>
+    <style>
+        :root { --primary: #3498db; --secondary: #2ecc71; --danger: #e74c3c; --dark: #2c3e50; }
+        body { font-family: 'Segoe UI', sans-serif; background: #ececec; padding: 20px; color: var(--dark); margin: 0; }
+        .container { max-width: 800px; margin: auto; padding: 10px; }
+        .card { background: white; padding: 20px; border-radius: 15px; box-shadow: 0 8px 20px rgba(0,0,0,0.1); margin-bottom: 20px; }
+        h2 { text-align: center; color: var(--primary); margin-top: 0; }
+        .grid-inputs { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        .full-width { grid-column: span 2; }
+        label { display: block; font-size: 12px; font-weight: bold; margin-bottom: 5px; color: #666; }
+        input { width: 100%; padding: 12px; border: 2px solid #eee; border-radius: 8px; box-sizing: border-box; font-size: 14px; }
+        input:focus { border-color: var(--primary); outline: none; }
+        button { width: 100%; padding: 15px; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; font-size: 16px; margin-top: 10px; transition: 0.3s; }
+        .btn-add { background: var(--secondary); color: white; }
+        .btn-add:hover { background: #27ae60; }
+        .history-card { background: white; border-radius: 15px; overflow-x: auto; box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
+        table { width: 100%; border-collapse: collapse; min-width: 500px; }
+        th, td { padding: 12px; text-align: left; border-bottom: 1px solid #eee; font-size: 13px; }
+        th { background: var(--primary); color: white; }
+        .badge { background: #e8f5e9; color: #2e7d32; padding: 4px 8px; border-radius: 5px; font-weight: bold; }
+        .btn-del { background: var(--danger); color: white; padding: 5px 10px; border-radius: 5px; font-size: 11px; border: none; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="card">
+        <h2>HPP & Stok Pro</h2>
+        <div class="grid-inputs">
+            <div class="input-group full-width"><label>Nama Produk</label><input type="text" id="nama" placeholder="Contoh: Kemeja"></div>
+            <div class="input-group"><label>Bahan Baku (Rp)</label><input type="text" id="bahan" class="money" placeholder="0"></div>
+            <div class="input-group"><label>Overhead (Rp)</label><input type="text" id="overhead" class="money" placeholder="0"></div>
+            <div class="input-group"><label>Margin (%)</label><input type="number" id="margin" value="20"></div>
+            <div class="input-group"><label>Stok</label><input type="number" id="stok" placeholder="0"></div>
+        </div>
+        <button class="btn-add" onclick="tambahData()">Simpan Data</button>
+    </div>
+
+    <div class="history-card">
+        <table>
+            <thead><tr><th>Produk</th><th>HPP</th><th>Harga Jual</th><th>Stok</th><th>Aksi</th></tr></thead>
+            <tbody id="listData"></tbody>
+        </table>
+    </div>
+</div>
+
+<script>
+    // Format Ribuan
+    document.querySelectorAll('.money').forEach(input => {
+        input.addEventListener('input', function() {
+            let val = this.value.replace(/[^0-9]/g, '');
+            if (val) {
+                this.value = parseInt(val).toLocaleString('id-ID');
+            }
+        });
+    });
+
+    function cleanNum(v) { return parseFloat(v.replace(/\./g, '')) || 0; }
+
+    function tampilkanData() {
+        const data = JSON.parse(localStorage.getItem('riwayatHpp')) || [];
+        const container = document.getElementById('listData');
+        container.innerHTML = '';
+        data.forEach((item, index) => {
+            container.innerHTML += `
+                <tr>
+                    <td><small>${item.tgl}</small><br><strong>${item.nama}</strong></td>
+                    <td>Rp ${item.hpp.toLocaleString('id-ID')}</td>
+                    <td><span class="badge">Rp ${item.jual.toLocaleString('id-ID')}</span></td>
+                    <td>${item.stok} pcs</td>
+                    <td><button class="btn-del" onclick="hapus(${index})">Hapus</button></td>
+                </tr>`;
+        });
+    }
+
+    function tambahData() {
+        const nama = document.getElementById('nama').value || "Produk Baru";
+        const hpp = cleanNum(document.getElementById('bahan').value) + cleanNum(document.getElementById('overhead').value);
+        const margin = parseFloat(document.getElementById('margin').value) || 0;
+        const jual = hpp + (hpp * margin / 100);
+        const stok = document.getElementById('stok').value || 0;
+        const tgl = new Date().toLocaleDateString('id-ID');
+
+        const data = JSON.parse(localStorage.getItem('riwayatHpp')) || [];
+        data.unshift({nama, hpp, jual, stok, tgl});
+        localStorage.setItem('riwayatHpp', JSON.stringify(data));
+        tampilkanData();
+        
+        // Reset form
+        document.getElementById('nama').value = ''; document.getElementById('bahan').value = '';
+        document.getElementById('overhead').value = ''; document.getElementById('stok').value = '';
+    }
+
+    function hapus(index) {
+        let data = JSON.parse(localStorage.getItem('riwayatHpp'));
+        data.splice(index, 1);
+        localStorage.setItem('riwayatHpp', JSON.stringify(data));
+        tampilkanData();
+    }
+
+    window.onload = tampilkanData;
+</script>
+</body>
+</html>
