@@ -2,132 +2,275 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Kalkulator HPP & Stok - Dropdown</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>pure.freshjuice - Stable Edition</title>
     <style>
-        :root { --primary: #3498db; --secondary: #2ecc71; --danger: #e74c3c; --dark: #2c3e50; }
-        body { font-family: 'Segoe UI', sans-serif; background: #ececec; padding: 20px; color: var(--dark); margin: 0; }
-        .container { max-width: 800px; margin: auto; padding: 10px; }
-        .card { background: white; padding: 20px; border-radius: 15px; box-shadow: 0 8px 20px rgba(0,0,0,0.1); margin-bottom: 20px; }
-        h2 { text-align: center; color: var(--primary); margin-top: 0; }
-        .grid-inputs { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-        .full-width { grid-column: span 2; }
-        label { display: block; font-size: 12px; font-weight: bold; margin-bottom: 5px; color: #666; }
-        input, select { width: 100%; padding: 12px; border: 2px solid #eee; border-radius: 8px; box-sizing: border-box; font-size: 14px; background: white; }
-        input:focus, select:focus { border-color: var(--primary); outline: none; }
-        button { width: 100%; padding: 15px; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; font-size: 16px; margin-top: 10px; transition: 0.3s; }
-        .btn-add { background: var(--secondary); color: white; }
-        .btn-add:hover { background: #27ae60; }
-        .history-card { background: white; border-radius: 15px; overflow-x: auto; box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
+        :root { --primary: #3498db; --secondary: #2ecc71; --danger: #e74c3c; --dark: #2c3e50; --light: #f4f7f6; }
+        body { font-family: 'Segoe UI', sans-serif; background: var(--light); margin: 0; padding-bottom: 100px; }
+        
+        .app-header { background: white; padding: 15px; text-align: center; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
+        .app-brand { font-weight: 800; font-size: 20px; color: var(--dark); letter-spacing: -0.5px; }
+        .app-brand span { color: var(--secondary); }
+
+        .bottom-nav { position: fixed; bottom: 0; width: 100%; background: white; display: flex; box-shadow: 0 -2px 15px rgba(0,0,0,0.1); z-index: 1000; }
+        .nav-item { flex: 1; padding: 12px; text-align: center; cursor: pointer; font-weight: bold; color: #888; font-size: 11px; }
+        .nav-item.active { color: var(--primary); border-top: 4px solid var(--primary); background: #f9f9f9; }
+
+        .container { padding: 20px; max-width: 800px; margin: auto; }
+        .page { display: none; }
+        .page.active { display: block; }
+
+        .pos-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+        .product-btn { background: white; padding: 15px; border-radius: 15px; text-align: center; border: 2px solid #f0f0f0; cursor: pointer; transition: 0.2s; box-shadow: 0 4px 6px rgba(0,0,0,0.02); }
+        .product-btn.out { opacity: 0.4; filter: grayscale(1); pointer-events: none; }
+        
+        .cart-section { background: white; border-radius: 15px; padding: 15px; box-shadow: 0 -5px 20px rgba(0,0,0,0.1); margin-top: 20px; border-top: 4px solid var(--secondary); }
+        .cart-item { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid #eee; }
+        .btn-qty { background: #eee; border: none; width: 25px; height: 25px; border-radius: 5px; cursor: pointer; }
+
+        .card { background: white; padding: 20px; border-radius: 15px; box-shadow: 0 4px 12px rgba(0,0,0,0.08); margin-bottom: 20px; }
+        label { display: block; font-size: 11px; font-weight: bold; margin-bottom: 5px; color: #666; text-transform: uppercase; }
+        input { width: 100%; padding: 12px; margin-bottom: 12px; border: 1.5px solid #eee; border-radius: 10px; box-sizing: border-box; }
+        .btn-main { width: 100%; padding: 15px; background: var(--secondary); color: white; border: none; border-radius: 10px; font-size: 16px; font-weight: bold; cursor: pointer; }
+        .btn-del { background: var(--danger); color: white; border: none; padding: 6px 10px; border-radius: 5px; cursor: pointer; font-size: 11px; }
+        
+        .table-card { background: white; border-radius: 15px; overflow-x: auto; box-shadow: 0 4px 12px rgba(0,0,0,0.08); }
         table { width: 100%; border-collapse: collapse; min-width: 500px; }
-        th, td { padding: 12px; text-align: left; border-bottom: 1px solid #eee; font-size: 13px; }
-        th { background: var(--primary); color: white; }
-        .badge { background: #e8f5e9; color: #2e7d32; padding: 4px 8px; border-radius: 5px; font-weight: bold; }
-        .btn-del { background: var(--danger); color: white; padding: 5px 10px; border-radius: 5px; font-size: 11px; border: none; }
+        th { background: var(--primary); color: white; padding: 12px; text-align: left; font-size: 13px; }
+        td { padding: 12px; border-bottom: 1px solid #eee; font-size: 13px; }
+
+        @media (max-width: 600px) { .pos-grid { grid-template-columns: 1fr; } }
     </style>
 </head>
 <body>
 
+<div class="app-header">
+    <div class="app-brand">pure.<span>freshjuice</span></div>
+</div>
+
 <div class="container">
-    <div class="card">
-        <h2>HPP & Stok Pro</h2>
-        <div class="grid-inputs">
-            <div class="input-group full-width">
-                <label>Pilih Produk</label>
-                <select id="nama">
-                    <option value="" disabled selected>-- Pilih Produk --</option>
-                    <option value="BeetRoots">BeetRoots</option>
-                    <option value="Cellery">Cellery</option>
-                    <option value="Strawberrry Watermelon">Strawberrry Watermelon</option>
-                    <option value="Kale">Kale</option>
-                    <option value="Glow Sunshine">Glow Sunshine</option>
-                    <option value="Ginger Shoot">Pure Semangka</option>
-                    <option value="Pure Nanas">Pure Nanas</option>
-                    <option value="Pure Semangka">Pure Semangka</option>
-                </select>
+    <div id="page-pos" class="page active">
+        <h3 style="text-align:center">🛒 Menu Jualan</h3>
+        <div id="pos-items" class="pos-grid"></div>
+        
+        <div id="cart-ui" class="cart-section" style="display:none;">
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+                <h4 style="margin:0">🛍️ Keranjang</h4>
+                <button onclick="cart=[]; renderCart();" style="border:none; background:none; color:red; cursor:pointer; font-size:12px;">Batal Semua</button>
             </div>
-            <div class="input-group"><label>Bahan Baku (Rp)</label><input type="text" id="bahan" class="money" placeholder="0"></div>
-            <div class="input-group"><label>Overhead (Rp)</label><input type="text" id="overhead" class="money" placeholder="0"></div>
-            <div class="input-group"><label>Margin (%)</label><input type="number" id="margin" value="20"></div>
-            <div class="input-group"><label>Stok</label><input type="number" id="stok" placeholder="0"></div>
+            <div id="cart-items"></div>
+            <div style="margin-top:15px; display:flex; justify-content:space-between; font-weight:bold;">
+                <span>Total Bayar:</span>
+                <span id="cart-total">Rp 0</span>
+            </div>
+            <button class="btn-main" style="margin-top:15px;" onclick="checkout()">Konfirmasi Jual</button>
         </div>
-        <button class="btn-add" onclick="tambahData()">Simpan Data</button>
     </div>
 
-    <div class="history-card">
-        <table>
-            <thead><tr><th>Produk</th><th>HPP</th><th>Harga Jual</th><th>Stok</th><th>Aksi</th></tr></thead>
-            <tbody id="listData"></tbody>
-        </table>
+    <div id="page-stock" class="page">
+        <h3 style="text-align:center">📦 Manajemen Stok</h3>
+        <div class="card">
+            <label>Nama Produk</label>
+            <input type="text" id="p-name" placeholder="Misal: Juice Alpukat">
+            <label>Modal HPP (Rp)</label>
+            <input type="text" id="p-hpp" class="money" placeholder="0">
+            <label>Margin Laba (%)</label>
+            <input type="number" id="p-margin" value="20">
+            <label>Tambah Stok</label>
+            <input type="number" id="p-qty" placeholder="0">
+            <button class="btn-main" onclick="saveData()">Update / Simpan Produk</button>
+        </div>
+        <div class="table-card">
+            <table>
+                <thead><tr><th>Produk</th><th>HPP</th><th>Harga</th><th>Stok</th><th>Aksi</th></tr></thead>
+                <tbody id="table-body"></tbody>
+            </table>
+        </div>
+    </div>
+
+    <div id="page-history" class="page">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+            <h3>📜 Riwayat Terjual</h3>
+            <button class="btn-del" onclick="clearAllHistory()">Reset Riwayat</button>
+        </div>
+        <div class="table-card">
+            <table>
+                <thead><tr><th>Waktu</th><th>Item</th><th>Qty</th><th>Total</th><th>Aksi</th></tr></thead>
+                <tbody id="history-body"></tbody>
+            </table>
+        </div>
     </div>
 </div>
 
+<div class="bottom-nav">
+    <div class="nav-item active" onclick="switchTab('page-pos', this)">🛒 KASIR</div>
+    <div class="nav-item" onclick="switchTab('page-stock', this)">📦 STOK</div>
+    <div class="nav-item" onclick="switchTab('page-history', this)">📜 RIWAYAT</div>
+</div>
+
 <script>
-    // Format Ribuan Otomatis
+    const ADMIN_PASS = "041116"; 
+    let db = JSON.parse(localStorage.getItem('juiceInventory')) || [];
+    let history = JSON.parse(localStorage.getItem('juiceHistory')) || [];
+    let cart = [];
+
+    function switchTab(id, el) {
+        document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+        document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+        document.getElementById(id).classList.add('active');
+        el.classList.add('active');
+        renderPOS(); renderTable(); renderHistory();
+    }
+
+    function verifyAdmin() {
+        const pass = prompt("Masukkan Sandi Keamanan:");
+        return pass === ADMIN_PASS;
+    }
+
+    function saveData() {
+        const name = document.getElementById('p-name').value.trim();
+        const hpp = parseInt(document.getElementById('p-hpp').value.replace(/\./g, '')) || 0;
+        const margin = parseFloat(document.getElementById('p-margin').value) || 0;
+        const qty = parseInt(document.getElementById('p-qty').value) || 0;
+
+        if(!name || hpp === 0) return alert("Nama dan HPP wajib diisi!");
+
+        const price = hpp + (hpp * margin / 100);
+        
+        // Cek jika produk sudah ada (Update Stok)
+        let existingIndex = db.findIndex(d => d.name.toLowerCase() === name.toLowerCase());
+        
+        if(existingIndex !== -1) {
+            db[existingIndex].stock += qty;
+            db[existingIndex].hpp = hpp;
+            db[existingIndex].price = price;
+        } else {
+            db.unshift({ id: Date.now(), name, hpp, margin, price, stock: qty });
+        }
+
+        localStorage.setItem('juiceInventory', JSON.stringify(db));
+        alert("Data Berhasil Disimpan!");
+        document.getElementById('p-name').value = '';
+        document.getElementById('p-hpp').value = '';
+        document.getElementById('p-qty').value = '';
+        renderTable();
+    }
+
+    function renderPOS() {
+        const grid = document.getElementById('pos-items');
+        grid.innerHTML = db.map((item, idx) => {
+            const isOut = item.stock <= 0;
+            return `
+                <div class="product-btn ${isOut ? 'out' : ''}" onclick="addToCart(${idx})">
+                    <strong>${item.name}</strong><br>
+                    <span style="color:var(--secondary); font-weight:bold;">Rp ${item.price.toLocaleString('id-ID')}</span><br>
+                    <small>${isOut ? 'HABIS' : 'Stok: ' + item.stock}</small>
+                </div>`;
+        }).join('');
+    }
+
+    function addToCart(idx) {
+        const item = db[idx];
+        const inCart = cart.find(c => c.id === item.id);
+        if(inCart) {
+            if(inCart.qty < item.stock) inCart.qty++;
+            else alert("Stok tidak mencukupi!");
+        } else {
+            cart.push({...item, qty: 1});
+        }
+        renderCart();
+    }
+
+    function renderCart() {
+        const ui = document.getElementById('cart-ui');
+        const list = document.getElementById('cart-items');
+        if(cart.length === 0) { ui.style.display = 'none'; return; }
+        ui.style.display = 'block';
+        
+        let total = 0;
+        list.innerHTML = cart.map((c, idx) => {
+            total += (c.price * c.qty);
+            return `
+                <div class="cart-item">
+                    <span>${c.name} (x${c.qty})</span>
+                    <div class="cart-controls">
+                        <button class="btn-qty" onclick="updateQty(${idx}, -1)">-</button>
+                        <button class="btn-qty" onclick="updateQty(${idx}, 1)">+</button>
+                    </div>
+                </div>`;
+        }).join('');
+        document.getElementById('cart-total').innerText = `Rp ${total.toLocaleString('id-ID')}`;
+    }
+
+    function updateQty(idx, change) {
+        const item = cart[idx];
+        const dbItem = db.find(d => d.id === item.id);
+        item.qty += change;
+        if(item.qty > dbItem.stock) item.qty = dbItem.stock;
+        if(item.qty <= 0) cart.splice(idx, 1);
+        renderCart();
+    }
+
+    function checkout() {
+        if(!confirm("Proses Penjualan?")) return;
+        cart.forEach(c => {
+            const target = db.find(d => d.id === c.id);
+            if(target) target.stock -= c.qty;
+            history.unshift({
+                time: new Date().toLocaleTimeString('id-ID'),
+                name: c.name,
+                qty: c.qty,
+                total: c.price * c.qty
+            });
+        });
+        localStorage.setItem('juiceInventory', JSON.stringify(db));
+        localStorage.setItem('juiceHistory', JSON.stringify(history));
+        cart = []; renderCart(); renderPOS();
+        alert("Berhasil!");
+    }
+
+    function renderTable() {
+        const tbody = document.getElementById('table-body');
+        tbody.innerHTML = db.map((item, idx) => `
+            <tr>
+                <td><strong>${item.name}</strong></td>
+                <td>Rp ${item.hpp.toLocaleString()}</td>
+                <td>Rp ${item.price.toLocaleString()}</td>
+                <td>${item.stock}</td>
+                <td><button class="btn-del" onclick="if(verifyAdmin()){ db.splice(${idx},1); localStorage.setItem('juiceInventory', JSON.stringify(db)); renderTable(); } else { alert('Sandi Salah'); }">Hapus</button></td>
+            </tr>`).join('');
+    }
+
+    function renderHistory() {
+        const tbody = document.getElementById('history-body');
+        tbody.innerHTML = history.map((h, idx) => `
+            <tr>
+                <td>${h.time}</td>
+                <td>${h.name}</td>
+                <td>${h.qty}</td>
+                <td>Rp ${h.total.toLocaleString()}</td>
+                <td><button class="btn-del" onclick="if(verifyAdmin()){ history.splice(${idx},1); localStorage.setItem('juiceHistory', JSON.stringify(history)); renderHistory(); } else { alert('Sandi Salah'); }">Hapus</button></td>
+            </tr>`).join('');
+    }
+
+    function clearAllHistory() {
+        if(verifyAdmin()) {
+            if(confirm("Hapus semua riwayat?")) {
+                history = [];
+                localStorage.setItem('juiceHistory', JSON.stringify(history));
+                renderHistory();
+            }
+        } else { alert('Sandi Salah'); }
+    }
+
     document.querySelectorAll('.money').forEach(input => {
         input.addEventListener('input', function() {
-            let val = this.value.replace(/[^0-9]/g, '');
-            if (val) {
-                this.value = parseInt(val).toLocaleString('id-ID');
-            }
+            let v = this.value.replace(/[^0-9]/g, '');
+            if (v) this.value = parseInt(v).toLocaleString('id-ID');
         });
     });
 
-    function cleanNum(v) { return parseFloat(v.replace(/\./g, '')) || 0; }
-
-    function tampilkanData() {
-        const data = JSON.parse(localStorage.getItem('riwayatHpp')) || [];
-        const container = document.getElementById('listData');
-        container.innerHTML = '';
-        data.forEach((item, index) => {
-            container.innerHTML += `
-                <tr>
-                    <td><small>${item.tgl}</small><br><strong>${item.nama}</strong></td>
-                    <td>Rp ${item.hpp.toLocaleString('id-ID')}</td>
-                    <td><span class="badge">Rp ${item.jual.toLocaleString('id-ID')}</span></td>
-                    <td>${item.stok} pcs</td>
-                    <td><button class="btn-del" onclick="hapus(${index})">Hapus</button></td>
-                </tr>`;
-        });
-    }
-
-    function tambahData() {
-        const namaInput = document.getElementById('nama');
-        const nama = namaInput.value;
-        
-        if (!nama) {
-            alert("Silakan pilih produk terlebih dahulu!");
-            return;
-        }
-
-        const hpp = cleanNum(document.getElementById('bahan').value) + cleanNum(document.getElementById('overhead').value);
-        const margin = parseFloat(document.getElementById('margin').value) || 0;
-        const jual = hpp + (hpp * margin / 100);
-        const stok = document.getElementById('stok').value || 0;
-        const tgl = new Date().toLocaleDateString('id-ID');
-
-        const data = JSON.parse(localStorage.getItem('riwayatHpp')) || [];
-        data.unshift({nama, hpp, jual, stok, tgl});
-        localStorage.setItem('riwayatHpp', JSON.stringify(data));
-        tampilkanData();
-        
-        // Reset form
-        namaInput.selectedIndex = 0;
-        document.getElementById('bahan').value = '';
-        document.getElementById('overhead').value = '';
-        document.getElementById('stok').value = '';
-    }
-
-    function hapus(index) {
-        if(confirm("Hapus data ini?")) {
-            let data = JSON.parse(localStorage.getItem('riwayatHpp'));
-            data.splice(index, 1);
-            localStorage.setItem('riwayatHpp', JSON.stringify(data));
-            tampilkanData();
-        }
-    }
-
-    window.onload = tampilkanData;
+    window.onload = () => { renderPOS(); renderTable(); renderHistory(); };
 </script>
 </body>
 </html>
