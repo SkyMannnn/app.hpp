@@ -3,11 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>pure.freshjuice - Stable POS</title>
+    <title>pure.freshjuice - Stable POS v2.0</title>
     <style>
         :root { --primary: #3498db; --secondary: #2ecc71; --danger: #e74c3c; --dark: #2c3e50; --light: #f4f7f6; }
         body { font-family: 'Segoe UI', sans-serif; background: var(--light); margin: 0; padding-bottom: 100px; }
         
+        /* Navigasi Bawah */
         .bottom-nav { position: fixed; bottom: 0; width: 100%; background: white; display: flex; box-shadow: 0 -2px 15px rgba(0,0,0,0.1); z-index: 1000; }
         .nav-item { flex: 1; padding: 15px; text-align: center; cursor: pointer; font-weight: bold; color: #888; font-size: 12px; }
         .nav-item.active { color: var(--primary); border-top: 4px solid var(--primary); background: #f9f9f9; }
@@ -16,14 +17,17 @@
         .page { display: none; }
         .page.active { display: block; }
 
+        /* Card & Input */
         .card { background: white; padding: 20px; border-radius: 15px; box-shadow: 0 4px 12px rgba(0,0,0,0.08); margin-bottom: 20px; }
         label { display: block; font-size: 11px; font-weight: bold; margin-bottom: 5px; color: #666; text-transform: uppercase; }
         input { width: 100%; padding: 12px; margin-bottom: 12px; border: 1.5px solid #eee; border-radius: 10px; box-sizing: border-box; }
         
+        /* Grid Produk Kasir */
         .pos-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
         .product-btn { background: white; padding: 15px; border-radius: 15px; text-align: center; border: 2px solid #f0f0f0; cursor: pointer; }
         .product-btn.out { opacity: 0.4; filter: grayscale(1); pointer-events: none; }
 
+        /* Tampilan Keranjang (Sesuai Gambar) */
         .cart-section { background: white; border-radius: 15px; padding: 20px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); margin-top: 20px; border-top: 5px solid var(--secondary); }
         .cart-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
         .cart-item { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid #f9f9f9; }
@@ -33,6 +37,7 @@
         .total-row { display: flex; justify-content: space-between; align-items: center; margin: 20px 0; font-size: 18px; font-weight: 800; }
         .btn-checkout { width: 100%; padding: 16px; background: var(--secondary); color: white; border: none; border-radius: 12px; font-size: 18px; font-weight: bold; cursor: pointer; }
 
+        /* Tabel Manajemen & Riwayat */
         .table-card { background: white; border-radius: 15px; overflow-x: auto; box-shadow: 0 4px 12px rgba(0,0,0,0.08); }
         table { width: 100%; border-collapse: collapse; min-width: 500px; }
         th { background: var(--primary); color: white; padding: 12px; text-align: left; font-size: 12px; }
@@ -52,7 +57,7 @@
         <div id="cart-ui" class="cart-section" style="display:none;">
             <div class="cart-header">
                 <span style="font-weight:bold; font-size:16px;">🛍️ Keranjang</span>
-                <span onclick="cart=[]; renderCart();" style="color:var(--danger); cursor:pointer; font-size:13px;">Batal Semua</span>
+                <span onclick="cart=[]; renderCart();" style="color:var(--danger); cursor:pointer; font-size:13px; font-weight:bold;">Batal Semua</span>
             </div>
             <div id="cart-items"></div>
             <div class="total-row">
@@ -78,7 +83,16 @@
         </div>
         <div class="table-card">
             <table>
-                <thead><tr><th>Update</th><th>Produk</th><th>Harga</th><th>Stok</th><th>Aksi</th></tr></thead>
+                <thead>
+                    <tr>
+                        <th>Update</th>
+                        <th>Produk</th>
+                        <th>Modal (HPP)</th>
+                        <th>Harga Jual</th>
+                        <th>Stok</th>
+                        <th>Aksi</th>
+                    </tr>
+                </thead>
                 <tbody id="table-body"></tbody>
             </table>
         </div>
@@ -136,9 +150,11 @@
         if(idx !== -1) {
             db[idx].stock += qty;
             db[idx].price = price;
+            db[idx].hpp = hpp; // Simpan HPP
             db[idx].time = getNow();
         } else {
-            db.unshift({ id: Date.now(), name, price, stock: qty, time: getNow() });
+            // Tambahkan HPP ke data produk baru
+            db.unshift({ id: Date.now(), name, price, hpp, stock: qty, time: getNow() });
         }
         localStorage.setItem('juiceInventory', JSON.stringify(db));
         alert("Data Tersimpan!");
@@ -220,11 +236,10 @@
             history.unshift({ time: getNow(), name: c.name, qty: c.qty, total: sub });
         });
 
-        // Simpan data
         localStorage.setItem('juiceInventory', JSON.stringify(db));
         localStorage.setItem('juiceHistory', JSON.stringify(history));
 
-        // METODE CETAK BARU (Pop-up Window)
+        // METODE CETAK (Pop-up Window)
         const printWindow = window.open('', '', 'width=400,height=600');
         printWindow.document.write(`
             <html>
@@ -250,13 +265,18 @@
         `);
         printWindow.document.close();
 
-        // Reset keranjang
         cart = []; renderCart(); renderPOS();
     }
 
     function renderTable() {
         document.getElementById('table-body').innerHTML = db.map((item, idx) => `
-            <tr><td>${item.time || '-'}</td><td><strong>${item.name}</strong></td><td>Rp ${item.price.toLocaleString()}</td><td>${item.stock}</td><td><button class="btn-del" onclick="if(prompt('Sandi:')=='${ADMIN_PASS}'){db.splice(${idx},1);localStorage.setItem('juiceInventory',JSON.stringify(db));renderTable();}">Hapus</button></td></tr>`).join('');
+            <tr>
+                <td style="font-size:10px; color:#999;">${item.time || '-'}</td>
+                <td><strong>${item.name}</strong></td>
+                <td style="color:#e67e22; font-weight:bold;">Rp ${(item.hpp || 0).toLocaleString()}</td> <td style="color:#2ecc71; font-weight:bold;">Rp ${item.price.toLocaleString()}</td>
+                <td>${item.stock}</td>
+                <td><button class="btn-del" onclick="if(prompt('Sandi:')=='${ADMIN_PASS}'){db.splice(${idx},1);localStorage.setItem('juiceInventory',JSON.stringify(db));renderTable();}">Hapus</button></td>
+            </tr>`).join('');
     }
 
     function renderHistory() {
@@ -265,12 +285,14 @@
     }
 
     function clearAllHistory() { if(prompt('Sandi:') == ADMIN_PASS) { history = []; localStorage.setItem('juiceHistory', JSON.stringify(history)); renderHistory(); } }
+    
     document.querySelectorAll('.money').forEach(input => {
         input.addEventListener('input', function() {
             let v = this.value.replace(/[^0-9]/g, '');
             if (v) this.value = parseInt(v).toLocaleString('id-ID');
         });
     });
+    
     window.onload = () => { renderPOS(); renderTable(); renderHistory(); };
 </script>
 </body>
